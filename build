@@ -1,0 +1,50 @@
+#!/bin/bash
+
+export PROJ_ROOT=$(pwd)
+export OUT_DIR=$(pwd)/out
+export PATH=$(pwd)/toolchain/aarch64-rockchip-linux-gnu/usr/bin:$PATH
+
+rm -rf out
+mkdir out
+chmod a+w out
+mkdir -p out/for_deploy
+chmod a+w out/for_deploy
+mkdir -p out/for_build/inc
+chmod a+w out/for_build/inc
+mkdir -p out/for_build/lib
+chmod a+w out/for_build/lib
+mkdir -p out/for_build/doc
+chmod a+w out/for_build/doc
+
+./configure --without-gtk --host=aarch64-rockchip-linux-gnu  --prefix=$(pwd)/out/for_deploy --enable-usbdir=yes --enable-usbredir=yes  --enable-smartcard=no --disable-werror  --enable-lz4=no --with-sasl=no  --disable-gstaudio --disable-gstvideo  --disable-webdav --disable-pulse  --enable-builtin-mjpeg=no  --with-audio=no  
+if [ "$?" != "0" ]; then
+        exit 1
+fi
+
+make -C ./
+if [ "$?" != "0" ]; then
+        exit 1
+fi
+
+make install -C ./
+if [ "$?" != "0" ]; then
+        exit 1
+fi
+
+make -C usbredirapi/
+if [ "$?" != "0" ]; then
+        exit 1
+fi
+
+cp usbredirapi/usbredirapi.h out/for_build/inc
+cp usbredirapi/libusbredirapi.so out/for_build/lib
+cp usbredirapi/readme.txt  out/for_build/doc
+
+cp usbredirapi/usbredirapi.h out/for_deploy/include
+cp usbredirapi/libusbredirapi.so out/for_deploy/lib
+cp usbredirapi/usbredirapi_test out/for_deploy/bin
+
+mv out/for_deploy/bin/spicy  out/for_deploy/bin/usbredir
+rm -rf out/for_deploy/lib/pkgconfig
+
+
