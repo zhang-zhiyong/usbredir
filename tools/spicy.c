@@ -115,6 +115,9 @@ static char * connection_connect(spice_connection *conn)
     }
 }
 
+
+
+
 static void connection_disconnect(spice_connection *conn)
 {
     if (conn->disconnecting)
